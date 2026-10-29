@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PsiDoradca - Inteligentny Asystent Żywienia i Aktywności Psa</title>
+  <meta name="description" content="Aplikacja dla właścicieli psów dobierająca odpowiednie jedzenie, zapotrzebowanie kaloryczne (DER/RER), gramaturę posiłków oraz spersonalizowany plan aktywności dla każdej rasy.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Nagłówek Aplikacji -->
+  <header class="app-header">
+    <div class="header-bg-glow"></div>
+    
+    <!-- Stylizowany znak wodny logo w tle nagłówka -->
+    <div class="header-logo-backdrop" aria-hidden="true">
+      <svg viewBox="0 0 100 100" fill="currentColor">
+        <path d="M50 8 C30 8 15 23 15 42 C15 57 26 70 38 78 L50 92 L62 78 C74 70 85 57 85 42 C85 23 70 8 50 8 Z" opacity="0.3"></path>
+        <circle cx="35" cy="30" r="7"></circle>
+        <circle cx="65" cy="30" r="7"></circle>
+        <ellipse cx="25" cy="48" rx="6" ry="10" transform="rotate(-15 25 48)"></ellipse>
+        <ellipse cx="75" cy="48" rx="6" ry="10" transform="rotate(15 75 48)"></ellipse>
+        <ellipse cx="50" cy="54" rx="16" ry="12"></ellipse>
+        <polygon points="50,56 44,50 56,50"></polygon>
+      </svg>
+    </div>
+
+    <div class="header-container">
+      <div class="logo-area">
+        <div class="logo-icon-wrap">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 5.172C10 3.782 8.423 2.679 6.5 3c-2.823.47-4.113 6.006-4 7 .08.703 1.725 1.722 3.5 1 1.695-.69 4-3.5 4-5.828z"></path>
+            <path d="M14 5.172C14 3.782 15.577 2.679 17.5 3c2.823.47 4.113 6.006 4 7-.08.703-1.725 1.722-3.5 1-1.695-.69-4-3.5-4-5.828z"></path>
+            <path d="M7 14c1.66 0 3-1.34 3-3 0-1.3-2.5-4-3-4s-3 2.7-3 4c0 1.66 1.34 3 3 3z"></path>
+            <path d="M17 14c1.66 0 3-1.34 3-3 0-1.3-2.5-4-3-4s-3 2.7-3 4c0 1.66 1.34 3 3 3z"></path>
+            <path d="M12 21a6 6 0 0 0 6-6c0-2-2-4-6-4s-6 2-6 4a6 6 0 0 0 6 6z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="logo-title">
+            PsiDoradca
+            <span class="logo-badge">PRO VET</span>
+          </div>
+          <div class="logo-subtitle">Inteligentny dobór diety, kalorii i aktywności dla Twojego pupila</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" class="btn-header-profile" onclick="resetForm()">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Nowy pies
+        </button>
+        <button type="button" class="btn-header-profile" onclick="openSavedProfilesModal()">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          Zapisane profile (<span id="savedProfilesCount">0</span>)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Główna Zawartość -->
+  <main class="main-content">
+    <div class="dashboard-grid">
+
+      <!-- Lewa kolumna: Formularz parametrów -->
+      <section class="app-card form-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #10b981;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+            Parametry i Profil Psa
+          </h2>
+          <span style="font-size: 0.8rem; color: #64748b;">Krok po kroku</span>
+        </div>
+
+        <div class="card-body">
+          <form id="dogParametersForm">
+            
+            <!-- 1. Rasa psa -->
+            <div class="form-section breed-search-container">
+              <label class="form-label" for="breedInput">
+                Rasa psa <span class="req">*</span>
+              </label>
+              <div class="search-input-wrap">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" id="breedInput" class="form-control" placeholder="Wpisz np. Labrador, Buldog, Kundelek..." autocomplete="off" required>
+              </div>
+              <div id="breedDropdown" class="breed-dropdown"></div>
+
+              <!-- Szybki wybór popularnych ras -->
+              <div class="breed-quick-picks">
+                <span class="quick-pick-pill" data-breed-id="labrador_retriever">Labrador</span>
+                <span class="quick-pick-pill" data-breed-id="owczarek_niemiecki">Owczarek Niemiecki</span>
+                <span class="quick-pick-pill" data-breed-id="buldog_francuski">Buldog Francuski</span>
+                <span class="quick-pick-pill" data-breed-id="cavalier_king_charles">Cavalier</span>
+                <span class="quick-pick-pill" data-breed-id="maltanczyk">Maltańczyk</span>
+                <span class="quick-pick-pill" data-breed-id="mieszaniec_sredni">Mieszaniec</span>
+              </div>
+
+              <!-- Badge wybranej rasy -->
+              <div id="selectedBreedBadge" class="selected-breed-badge" style="display: none;"></div>
+            </div>
+
+            <!-- 2. Imię psa i Płeć -->
+            <div class="form-section form-row">
+              <div>
+                <label class="form-label" for="dogName">Imię pupila</label>
+                <input type="text" id="dogName" class="form-control" placeholder="np. Luna, Reksio" value="Luna">
+              </div>
+              <div>
+                <label class="form-label">Płeć</label>
+                <div class="radio-cards-grid">
+                  <label class="radio-card">
+                    <input type="radio" name="dogSex" value="male">
+                    <div class="radio-card-content">
+                      <span>♂ Pies</span>
+                    </div>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="dogSex" value="female" checked>
+                    <div class="radio-card-content">
+                      <span>♀ Suka</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Wiek i Waga -->
+            <div class="form-section form-row">
+              <div>
+                <label class="form-label">Wiek (lata i miesiące) <span class="req">*</span></label>
+                <div style="display: flex; gap: 0.5rem;">
+                  <div style="flex: 1;">
+                    <input type="number" id="dogAgeYears" class="form-control" placeholder="Lata" min="0" max="25" value="3" required>
+                  </div>
+                  <div style="flex: 1;">
+                    <input type="number" id="dogAgeMonths" class="form-control" placeholder="Mies." min="0" max="11" value="0">
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label class="form-label" for="dogWeight">Aktualna waga (kg) <span class="req">*</span></label>
+                <input type="number" id="dogWeight" class="form-control" placeholder="np. 15.5" step="0.1" min="0.5" max="120" value="14" required>
+              </div>
+            </div>
+
+            <!-- 4. Kastracja / Sterylizacja -->
+            <div class="form-section">
+              <label class="form-label">Status kastracji / sterylizacji</label>
+              <div class="radio-cards-grid">
+                <label class="radio-card">
+                  <input type="radio" name="isNeutered" value="yes" checked>
+                  <div class="radio-card-content">
+                    <span>✂️ Po zabiegu</span>
+                    <small style="font-size: 0.72rem; color: #64748b;">(zmniejszone zapotrzebowanie kcal)</small>
+                  </div>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="isNeutered" value="no">
+                  <div class="radio-card-content">
+                    <span>Niekastrowany / Cały</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- 5. Ocena kondycji sylwetki (BCS) -->
+            <div class="form-section">
+              <label class="form-label">Budowa i sylwetka ciała (BCS)</label>
+              <div class="radio-cards-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <label class="radio-card">
+                  <input type="radio" name="bodyCondition" value="underweight">
+                  <div class="radio-card-content">
+                    <span style="font-size: 1.1rem;">🦴</span>
+                    <span>Niedowaga</span>
+                    <small style="font-size: 0.7rem; color: #64748b;">Widoczne żebra</small>
+                  </div>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="bodyCondition" value="ideal" checked>
+                  <div class="radio-card-content">
+                    <span style="font-size: 1.1rem;">⚖️</span>
+                    <span>Idealna</span>
+                    <small style="font-size: 0.7rem; color: #64748b;">Wyczuwalne żebra</small>
+                  </div>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="bodyCondition" value="overweight">
+                  <div class="radio-card-content">
+                    <span style="font-size: 1.1rem;">🛋️</span>
+                    <span>Nadwaga</span>
+                    <small style="font-size: 0.7rem; color: #64748b;">Zanik talii / tłuszcz</small>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- 6. Poziom codziennej aktywności -->
+            <div class="form-section">
+              <label class="form-label">Codzienny poziom aktywności</label>
+              <div class="radio-cards-grid" style="grid-template-columns: 1fr 1fr;">
+                <label class="radio-card">
+                  <input type="radio" name="activityLevel" value="low">
+                  <div class="radio-card-content" style="text-align: left; align-items: flex-start;">
+                    <span>🛋️ Niski / Kanapowiec</span>
+                    <small style="font-size: 0.72rem; color: #64748b;">Krótkie spacery toaletowe (&lt; 45 min/dzień)</small>
+                  </div>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="activityLevel" value="moderate" checked>
+                  <div class="radio-card-content" style="text-align: left; align-items: flex-start;">
+                    <span>🚶 Umiarkowany</span>
+                    <small style="font-size: 0.72rem; color: #64748b;">Standardowe spacery i węszenie (1-2h/dzień)</small>
+                  </div>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="activityLevel" value="high">
+                  <div class="radio-card-content" style="text-align: left; align-items: flex-start;">
+                    <span>🏃 Bardzo aktywny</span>
+                    <small style="font-size: 0.72rem; color: #64748b;">Długie wycieczki, bieganie, treningi (&gt; 2h)</small>
+                  </div>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="activityLevel" value="athletic">
+                  <div class="radio-card-content" style="text-align: left; align-items: flex-start;">
+                    <span>⚡ Sportowiec / Praca</span>
+                    <small style="font-size: 0.72rem; color: #64748b;">Agility, canicross, praca ratownicza</small>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- 7. Preferowany typ żywienia -->
+            <div class="form-section">
+              <label class="form-label">Preferowany rodzaj karmy</label>
+              <div class="radio-cards-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <label class="radio-card">
+                  <input type="radio" name="foodPreference" value="dry" checked>
+                  <div class="radio-card-content">
+                    <span style="font-size: 1.1rem;">🥣</span>
+                    <span>Karma Sucha</span>
+                  </div>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="foodPreference" value="wet">
+                  <div class="radio-card-content">
+                    <span style="font-size: 1.1rem;">🥫</span>
+                    <span>Karma Mokra</span>
+                  </div>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="foodPreference" value="mixed">
+                  <div class="radio-card-content">
+                    <span style="font-size: 1.1rem;">🍲</span>
+                    <span>Mix (Sucha + Mokra)</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- 8. Znane alergie i nietolerancje pokarmowe -->
+            <div class="form-section">
+              <label class="form-label">Alergie i wykluczenia pokarmowe</label>
+              <div class="tags-grid">
+                <label class="tag-checkbox">
+                  <input type="checkbox" name="allergy" value="Drób (kurczak)">
+                  <span class="tag-content">Kurczak / Drób</span>
+                </label>
+                <label class="tag-checkbox">
+                  <input type="checkbox" name="allergy" value="Zboża (pszenica/kukurydza)">
+                  <span class="tag-content">Zboża / Gluten</span>
+                </label>
+                <label class="tag-checkbox">
+                  <input type="checkbox" name="allergy" value="Wołowina">
+                  <span class="tag-content">Wołowina</span>
+                </label>
+                <label class="tag-checkbox">
+                  <input type="checkbox" name="allergy" value="Ryby">
+                  <span class="tag-content">Ryby</span>
+                </label>
+                <label class="tag-checkbox">
+                  <input type="checkbox" name="allergy" value="Nabiał">
+                  <span class="tag-content">Nabiał</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 9. Cechy zdrowotne i wrażliwości -->
+            <div class="form-section">
+              <label class="form-label">Szczególne potrzeby zdrowotne</label>
+              <div class="tags-grid">
+                <label class="tag-checkbox">
+                  <input type="checkbox" name="healthIssue" value="sensitive_stomach">
+                  <span class="tag-content">Wrażliwy żołądek / biegunki</span>
+                </label>
+                <label class="tag-checkbox">
+                  <input type="checkbox" name="healthIssue" value="joints">
+                  <span class="tag-content">Wsparcie stawów / dysplazja</span>
+                </label>
+                <label class="tag-checkbox">
+                  <input type="checkbox" name="healthIssue" value="skin_coat">
+                  <span class="tag-content">Dermatologia / sierść</span>
+                </label>
+                <label class="tag-checkbox">
+                  <input type="checkbox" name="healthIssue" value="bloat_risk">
+                  <span class="tag-content">Skłonność do skrętu żołądka</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 10. Choroby Przewlekłe i Schorzenia Kliniczne (NOWOŚĆ) -->
+            <div class="form-section">
+              <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Choroby przewlekłe i diagnozy kliniczne</span>
+                <span style="font-size: 0.72rem; color: #e11d48; font-weight: 700; background: #ffe4e6; padding: 2px 7px; border-radius: 10px;">Diety weterynaryjne</span>
+              </label>
+              <div class="disease-grid">
+                
+                <label class="disease-card">
+                  <input type="checkbox" name="chronicDisease" value="tarczyca">
+                  <div class="disease-card-inner">
+                    <span class="disease-card-icon">🩺</span>
+                    <span class="disease-card-name">Tarczyca</span>
+                    <small style="font-size: 0.68rem; color: #64748b;">Niedoczynność</small>
+                  </div>
+                </label>
+
+                <label class="disease-card">
+                  <input type="checkbox" name="chronicDisease" value="watroba">
+                  <div class="disease-card-inner">
+                    <span class="disease-card-icon">🧪</span>
+                    <span class="disease-card-name">Wątroba</span>
+                    <small style="font-size: 0.68rem; color: #64748b;">Hepatopatia</small>
+                  </div>
+                </label>
+
+                <label class="disease-card">
+                  <input type="checkbox" name="chronicDisease" value="nerki">
+                  <div class="disease-card-inner">
+                    <span class="disease-card-icon">💧</span>
+                    <span class="disease-card-name">Nerki</span>
+                    <small style="font-size: 0.68rem; color: #64748b;">PChN / Mocznik</small>
+                  </div>
+                </label>
+
+                <label class="disease-card">
+                  <input type="checkbox" name="chronicDisease" value="trzustka">
+                  <div class="disease-card-inner">
+                    <span class="disease-card-icon">⚠️</span>
+                    <span class="disease-card-name">Trzustka</span>
+                    <small style="font-size: 0.68rem; color: #64748b;">Zapalenie / EPI</small>
+                  </div>
+                </label>
+
+                <label class="disease-card">
+                  <input type="checkbox" name="chronicDisease" value="cukrzyca">
+                  <div class="disease-card-inner">
+                    <span class="disease-card-icon">🩸</span>
+                    <span class="disease-card-name">Cukrzyca</span>
+                    <small style="font-size: 0.68rem; color: #64748b;">Insulina / Glukoza</small>
+                  </div>
+                </label>
+
+                <label class="disease-card">
+                  <input type="checkbox" name="chronicDisease" value="serce">
+                  <div class="disease-card-inner">
+                    <span class="disease-card-icon">🫀</span>
+                    <span class="disease-card-name">Serce</span>
+                    <small style="font-size: 0.68rem; color: #64748b;">DCM / Zastawki</small>
+                  </div>
+                </label>
+
+                <label class="disease-card">
+                  <input type="checkbox" name="chronicDisease" value="padaczka">
+                  <div class="disease-card-inner">
+                    <span class="disease-card-icon">⚡</span>
+                    <span class="disease-card-name">Padaczka</span>
+                    <small style="font-size: 0.68rem; color: #64748b;">Epilepsja / MCT</small>
+                  </div>
+                </label>
+
+                <label class="disease-card">
+                  <input type="checkbox" name="chronicDisease" value="stawy_zwyrodnienia">
+                  <div class="disease-card-inner">
+                    <span class="disease-card-icon">🦴</span>
+                    <span class="disease-card-name">Stawy</span>
+                    <small style="font-size: 0.68rem; color: #64748b;">Zwyrodnienia</small>
+                  </div>
+                </label>
+
+                <label class="disease-card">
+                  <input type="checkbox" name="chronicDisease" value="cushing">
+                  <div class="disease-card-inner">
+                    <span class="disease-card-icon">🛡️</span>
+                    <span class="disease-card-name">Cushing</span>
+                    <small style="font-size: 0.68rem; color: #64748b;">Nadnercza</small>
+                  </div>
+                </label>
+
+                <label class="disease-card">
+                  <input type="checkbox" name="chronicDisease" value="alergie_skorne">
+                  <div class="disease-card-inner">
+                    <span class="disease-card-icon">🌿</span>
+                    <span class="disease-card-name">AZS / Skóra</span>
+                    <small style="font-size: 0.68rem; color: #64748b;">Atopia / Świąd</small>
+                  </div>
+                </label>
+
+              </div>
+            </div>
+
+            <!-- Przycisk zatwierdzenia -->
+            <button type="submit" class="btn-primary" style="margin-top: 1rem;">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              Wylicz kalorie i dobierz plan dla psa
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Prawa kolumna: Wyniki i Raport -->
+      <section class="results-container" id="resultsContainer">
+        
+        <!-- Pusty stan początkowy -->
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21a6 6 0 0 0 6-6c0-2-2-4-6-4s-6 2-6 4a6 6 0 0 0 6 6z"></path><path d="M7 14c1.66 0 3-1.34 3-3 0-1.3-2.5-4-3-4s-3 2.7-3 4c0 1.66 1.34 3 3 3z"></path><path d="M17 14c1.66 0 3-1.34 3-3 0-1.3-2.5-4-3-4s-3 2.7-3 4c0 1.66 1.34 3 3 3z"></path></svg>
+          </div>
+          <h3>Wprowadź dane Twojego psa</h3>
+          <p>Wybierz rasę i uzupełnij parametry po lewej stronie, aby otrzymać precyzyjne wyliczenia kaloryczne (RER/DER), optymalny dobór karmy oraz plan aktywności.</p>
+          
+          <div style="margin-top: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;">
+            <span style="font-size: 0.85rem; font-weight: 600; color: #475569;">Lub przetestuj natychmiast na profilu demo:</span>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
+              <button type="button" class="quick-pick-pill" id="demoLabradorBtn">🐕 Labrador (Tarczyca)</button>
+              <button type="button" class="quick-pick-pill" id="demoPuppyBtn">🐾 Szczeniak Cavalier</button>
+              <button type="button" class="quick-pick-pill" id="demoSeniorBtn">🦮 Senior (Wątroba & Stawy)</button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- Sekcja Przewodnika Bezpieczeństwa Żywnościowego -->
+    <section class="app-card safety-section" style="margin-top: 2rem;">
+      <div class="card-header">
+        <h3 class="card-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ef4444;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          Baza Wiedzy: Czy mój pies może to zjeść? (Bezpieczne vs Toksyczne)
+        </h3>
+        <span class="portion-badge">Szybka weryfikacja</span>
+      </div>
+      <div class="card-body">
+        <div class="safety-search-bar">
+          <input type="text" id="foodSearchInput" class="form-control" placeholder="Szukaj produktu (np. czekolada, marchewka, winogrona, orzechy, banan)...">
+        </div>
+        <div id="foodSafetyResults" class="food-items-grid"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal Zapisanych Psów -->
+  <div class="modal-overlay" id="profilesModal">
+    <div class="modal-card">
+      <div class="card-header">
+        <h3 class="card-title">Twoje Zapisane Profile Psów</h3>
+        <button type="button" class="btn-print" style="border: none; padding: 0.3rem 0.6rem; font-size: 1.1rem;" onclick="closeSavedProfilesModal()">✕</button>
+      </div>
+      <div class="card-body">
+        <div id="savedProfilesList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skrypty bazy wiedzy i silnika -->
+  <script src="breeds.js"></script>
+  <script src="calculator.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
